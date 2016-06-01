@@ -1,0 +1,14 @@
+{
+    "name": "nexmo/php-chat",
+    "authors": [
+        {
+            "name": "Tim Lytle",
+            "email": "tim@timlytle.net"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "nexmo/client": "^1.0@beta",
+        "mongodb/mongodb": "^1.0.0"
+    }
+}

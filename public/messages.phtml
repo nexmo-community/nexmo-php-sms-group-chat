@@ -1,0 +1,21 @@
+
+<div class="row">
+    <div class="btn-group">
+        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Group <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+            <?php foreach ($groups as $group): ?>
+                <li><a href="?group=<?php echo $group['group']; ?>"><?php echo $group['group']; ?></a></li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
+    <?php foreach($messages as $message): ?>
+    <div class="media">
+        <div class="media-body">
+            <h4 class="media-heading"><?php echo $message['name'] ?></h4>
+            <?php echo $message['text'] ?>
+        </div>
+    </div>
+    <?php endforeach; ?>
+</div>
