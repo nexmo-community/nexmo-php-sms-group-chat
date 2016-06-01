@@ -43,9 +43,13 @@ if (isset($_SESSION['user'])) {
         ]
     ];
 
-    error_log(json_encode($query, JSON_PRETTY_PRINT));
-    $messages = $db->selectCollection('logs')->find($query);
+    $options = [
+        'sort' => ['date' => -1]
+    ];
 
+    $messages = $db->selectCollection('logs')->find($query, $options);
+
+    //simple template rendering
     ob_start();
     include __DIR__ . '/messages.phtml';
     $content = ob_get_clean();
@@ -89,7 +93,7 @@ if (isset($_SESSION['user'])) {
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Starter Template for Bootstrap</title>
+    <title>Group Chat Tutorial</title>
 
     <!-- Bootstrap core CSS -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
