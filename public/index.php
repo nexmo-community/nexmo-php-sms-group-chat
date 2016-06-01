@@ -6,28 +6,28 @@ $db = $mongo->selectDatabase($config['mongo']['database']);
 
 session_start();
 
-if(isset($_GET['logout'])){
+if (isset($_GET['logout'])) {
     $_SESSION['user'] = null;
     $_SESSION['verification'] = null;
 }
 
-if(isset($_SESSION['user'])){
+if (isset($_SESSION['user'])) {
     //find groups user belongs to
     $groups = $db->selectCollection('users')->find([
         'user' => $_SESSION['user']
     ])->toArray();
     
-    if(!$groups){
+    if (!$groups) {
         $error = 'User has no groups.';
         return;
     }
 
     //select a group
-    if(!isset($_GET['group'])){
+    if (!isset($_GET['group'])) {
         $selected = reset($groups);
     } else {
-        foreach($groups as $group){
-            if($group['group'] == $_GET['group']){
+        foreach ($groups as $group) {
+            if ($group['group'] == $_GET['group']) {
                 $selected = $group;
                 break;
             }
@@ -49,8 +49,7 @@ if(isset($_SESSION['user'])){
     ob_start();
     include __DIR__ . '/messages.phtml';
     $content = ob_get_clean();
-
-} elseif (isset($_SESSION['verification']) AND isset($_POST['code'])){
+} elseif (isset($_SESSION['verification']) and isset($_POST['code'])) {
     try {
         $verificaton = unserialize($_SESSION['verification']);
         $nexmo->verify()->check($verificaton, $_POST['code']);
@@ -61,12 +60,11 @@ if(isset($_SESSION['user'])){
         $error = $e->getMessage();
         $content = file_get_contents(__DIR__ . '/code.html');
     }
-
-} elseif(isset($_SESSION['verification'])) {
+} elseif (isset($_SESSION['verification'])) {
     $content = file_get_contents(__DIR__ . '/code.html');
 } elseif (isset($_POST['number'])) {
     //start the verification
-    try{
+    try {
         $verificaton = $nexmo->verify()->start([
             'number' => $_POST['number'],
             'brand'  => 'GroupChat'
@@ -112,7 +110,7 @@ if(isset($_SESSION['user'])){
         </p>
     </div>
 
-    <?php if(isset($error)): ?>
+    <?php if (isset($error)): ?>
     <div class="alert alert-danger" role="alert">
         <?php echo $error ?>
     </div>

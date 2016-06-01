@@ -1,13 +1,13 @@
 <?php
 //bootstrap, nexmo client config, database
 $config = require __DIR__ . '/../bootstrap.php';
-$nexmo = $config['nexmo']['client'];
-$mongo = $config['mongo']['client'];
-$db = $config['mongo']['db'];
+$nexmo = new \Nexmo\Client(new \Nexmo\Client\Credentials\Basic($config['nexmo']['key'], $config['nexmo']['secret']));
+$mongo = new \MongoDB\Client($config['mongo']['uri']);
+$db = $mongo->selectDatabase($config['mongo']['database']);
 
 //is this a message from Nexmo?
 $inbound = \Nexmo\Message\InboundMessage::createFromGlobals();
-if(!$inbound->isValid()){
+if (!$inbound->isValid()) {
     error_log('not an inbound message');
     return;
 }
@@ -18,7 +18,7 @@ $user = $db->selectCollection('users')->findOne([
     'user'  => $inbound->getFrom() //the user's  number
 ]);
 
-if($user){
+if ($user) {
     error_log('found user: ' . $user['name']);
 } else {
     error_log('no user found');
@@ -26,19 +26,19 @@ if($user){
 
 //check if they sent a command (keyword + optional argument)
 $command = preg_split('#\s#', $inbound->getBody(), 2);
-switch(strtolower(trim($command[0]))){
+switch (strtolower(trim($command[0]))) {
     //subscription request
-    case 'join';
+    case 'join':
         error_log('got join command');
 
         //for new users, we require a name
-        if(!$user && empty($command[1])){
+        if (!$user && empty($command[1])) {
             $nexmo->message()->send($inbound->createReply('Use JOIN [your name] to join this group.'));
             break;
         }
 
         //for new users, we need to setup the initial data
-        if(!$user){
+        if (!$user) {
             $user = [
                 'group' => $inbound->getTo(),
                 'user' => $inbound->getFrom(),
@@ -47,7 +47,7 @@ switch(strtolower(trim($command[0]))){
             ];
         }
 
-        if(isset($command[1])){
+        if (isset($command[1])) {
             $user['name'] = $command[1];
         }
 
@@ -68,11 +68,11 @@ switch(strtolower(trim($command[0]))){
         break;
 
     //unsubscribe request
-    case 'leave';
+    case 'leave':
         error_log('got leave command');
 
         //leave only makes sense if the user exists
-        if(!$user){
+        if (!$user) {
             $nexmo->message()->send($inbound->createReply('Use JOIN [your name] to join this group.'));
             break;
         }
@@ -101,7 +101,7 @@ switch(strtolower(trim($command[0]))){
         error_log('no command found');
 
         //only active users can post to the group
-        if(!$user || 'active' != $user['status']){
+        if (!$user || 'active' != $user['status']) {
             $nexmo->message()->send($inbound->createReply('Use JOIN [your name] to join this group.'));
             break;
         }
@@ -126,7 +126,7 @@ switch(strtolower(trim($command[0]))){
             'status' => 'active'
         ]);
 
-        foreach($members as $member) {
+        foreach ($members as $member) {
             $sent = $nexmo->message()->send([
                 'to'   => $member['user'],
                 'from' => $inbound->getTo(),
