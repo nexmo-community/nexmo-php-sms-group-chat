@@ -9,7 +9,7 @@ Installation
 
 Clone the repository ([or download the source][source]):
 
-    $ git clone git@github.com:Nexmo/GroupChat.git
+    $ git clone git@github.com:nexmo-community/nexmo-sms-group-chat.git
 
 Once you have the code, install the dependencies (just the [php client library][php_lib]) using composer:
 
@@ -47,8 +47,8 @@ Now just send a 'join` command to that number from your phone, and watch the php
 [tutorial]: https://www.nexmo.com/blog/    
 [php_lib]: https://github.com/Nexmo/nexmo-php    
 [ngrok]: https://ngrok.com/
-[webhook]: https://docs.nexmo.com/messaging/setup-callbacks#setting?utm_source=DEV_REL&utm_medium=github&utm_campaign=GroupChat 
+[webhook]: https://docs.nexmo.com/messaging/setup-callbacks#setting?utm_source=DEV_REL&utm_medium=github&utm_campaign=nexmo-sms-group-chat 
 [mLab]: https://mlab.com/plans/pricing/
 [compose]: https://app.compose.io/signup/
-[account]: https://dashboard.nexmo.com/sign-up?utm_source=DEV_REL&utm_medium=github&utm_campaign=GroupChat&utm_term=account
-[free]: https://dashboard.nexmo.com/sign-up?utm_source=DEV_REL&utm_medium=github&utm_campaign=GroupChat&utm_term=free
+[account]: https://dashboard.nexmo.com/sign-up?utm_source=DEV_REL&utm_medium=github&utm_campaign=nexmo-sms-group-chat&utm_term=account
+[free]: https://dashboard.nexmo.com/sign-up?utm_source=DEV_REL&utm_medium=github&utm_campaign=nexmo-sms-group-chat&utm_term=free
