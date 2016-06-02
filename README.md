@@ -44,7 +44,7 @@ Once your installation has a public URL, you'll need to configure one of your Ne
 Now just send a 'join` command to that number from your phone, and watch the php error log for debug info.
     
 [config]: config.dist.php    
-[tutorial]: https://www.nexmo.com/blog/    
+[tutorial]: https://www.nexmo.com/blog/2016/06/02/building-text-message-group-chat-nexmo-sms-api-php/
 [php_lib]: https://github.com/Nexmo/nexmo-php    
 [ngrok]: https://ngrok.com/
 [webhook]: https://docs.nexmo.com/messaging/setup-callbacks#setting?utm_source=DEV_REL&utm_medium=github&utm_campaign=nexmo-sms-group-chat 
@@ -52,4 +52,4 @@ Now just send a 'join` command to that number from your phone, and watch the php
 [compose]: https://app.compose.io/signup/
 [account]: https://dashboard.nexmo.com/sign-up?utm_source=DEV_REL&utm_medium=github&utm_campaign=nexmo-sms-group-chat&utm_term=account
 [free]: https://dashboard.nexmo.com/sign-up?utm_source=DEV_REL&utm_medium=github&utm_campaign=nexmo-sms-group-chat&utm_term=free
-[source]: https://github.com/nexmo-community/nexmo-sms-group-chat/archive/master.zip
+[source]: https://github.com/nexmo-community/nexmo-php-sms-group-chat/archive/master.zip
