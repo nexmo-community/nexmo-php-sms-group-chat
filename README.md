@@ -52,3 +52,4 @@ Now just send a 'join` command to that number from your phone, and watch the php
 [compose]: https://app.compose.io/signup/
 [account]: https://dashboard.nexmo.com/sign-up?utm_source=DEV_REL&utm_medium=github&utm_campaign=nexmo-sms-group-chat&utm_term=account
 [free]: https://dashboard.nexmo.com/sign-up?utm_source=DEV_REL&utm_medium=github&utm_campaign=nexmo-sms-group-chat&utm_term=free
+[source]: https://github.com/nexmo-community/nexmo-sms-group-chat/archive/master.zip
