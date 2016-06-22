@@ -6,9 +6,8 @@
             "email": "tim@timlytle.net"
         }
     ],
-    "minimum-stability": "dev",
     "require": {
-        "nexmo/client": "^1.0@beta",
+        "nexmo/client": "dev-master as 1.0",
         "mongodb/mongodb": "^1.0.0"
     }
 }

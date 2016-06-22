@@ -7,80 +7,127 @@ $db = $mongo->selectDatabase($config['mongo']['database']);
 session_start();
 
 if (isset($_GET['logout'])) {
-    $_SESSION['user'] = null;
-    $_SESSION['verification'] = null;
+    $_SESSION['user']   = null;
+    $_SESSION['number'] = null;
+    header('Location: /');
+    return;
 }
 
 if (isset($_SESSION['user'])) {
-    //find groups user belongs to
-    $groups = $db->selectCollection('users')->find([
-        'user' => $_SESSION['user']
-    ])->toArray();
-    
-    if (!$groups) {
-        $error = 'User has no groups.';
-        return;
-    }
+    try {
+        //find groups user belongs to
+        $groups = $db->selectCollection('users')->find([
+            'user' => $_SESSION['user']
+        ])->toArray();
 
-    //select a group
-    if (!isset($_GET['group'])) {
-        $selected = reset($groups);
-    } else {
-        foreach ($groups as $group) {
-            if ($group['group'] == $_GET['group']) {
-                $selected = $group;
-                break;
+        if (!$groups) {
+            $error = 'User has no groups.';
+            return;
+        }
+        
+        //select a group
+        if (isset($_GET['group'])) {
+            foreach ($groups as $group) {
+                if ($group['group'] == $_GET['group']) {
+                    $selected = $group;
+                    break;
+                }
             }
         }
-    }
-        
-    //find all messages the user's been sent
-    $query = [
-        'group' => $selected['group'],
-        '$or' => [
-            ['user' => $_SESSION['user']],
-            ['sends.user' => $_SESSION['user']]
-        ]
-    ];
 
-    $options = [
-        'sort' => ['date' => -1]
-    ];
+        if (!isset($selected)) {
+            $selected = reset($groups);
+        }
 
-    $messages = $db->selectCollection('logs')->find($query, $options);
+        //find all messages the user's been sent
+        $query = [
+            'group' => $selected['group'],
+            '$or' => [
+                ['user' => $_SESSION['user']],
+                ['sends.user' => $_SESSION['user']]
+            ]
+        ];
 
-    //simple template rendering
-    ob_start();
-    include __DIR__ . '/messages.phtml';
-    $content = ob_get_clean();
-} elseif (isset($_SESSION['verification']) and isset($_POST['code'])) {
-    try {
-        $verificaton = unserialize($_SESSION['verification']);
-        $nexmo->verify()->check($verificaton, $_POST['code']);
-        $_SESSION['user'] = $verificaton->getNumber();
-        header('Location: /');
-        return;
-    } catch (\Nexmo\Client\Exception\Request $e) {
+        $options = [
+            'sort' => ['date' => -1]
+        ];
+
+        $messages = $db->selectCollection('logs')->find($query, $options);
+
+        //simple template rendering
+        ob_start();
+        include __DIR__ . '/messages.phtml';
+        $content = ob_get_clean();
+    } catch (Exception $e) {
+        $content = '';
         $error = $e->getMessage();
-        $content = file_get_contents(__DIR__ . '/code.html');
     }
-} elseif (isset($_SESSION['verification'])) {
-    $content = file_get_contents(__DIR__ . '/code.html');
-} elseif (isset($_POST['number'])) {
-    //start the verification
+
+//we have a code to try
+} elseif (isset($_SESSION['number']) and isset($_POST['code'])) {
     try {
-        $verificaton = $nexmo->verify()->start([
+        $login = $db->selectCollection('logins')->findOne(
+            ['_id' => $_SESSION['number']],
+            ['projection' => ['verifications' => ['$slice' => -1]]]
+        );
+
+        if (!$login) {
+            throw new Exception('Could not find verification.');
+        }
+
+        /* @var $verification \Nexmo\Verify\Verification */
+        $verification = $nexmo->unserialize($login['verifications'][0]);
+
+        if ($verification->check($_POST['code'])) {
+            $_SESSION['user'] = $verification->getNumber();
+            header('Location: /');
+            return;
+        } else {
+            $error = 'Invalid Code';
+            $content = file_get_contents(__DIR__ . '/code.html');
+        }
+    } catch (Exception $e) {
+        $error = $e->getMessage();
+        $_SESSION['number'] = null;
+    }
+
+//we have an ongoing verification for this number
+} elseif (isset($_SESSION['number'])) {
+    $content = file_get_contents(__DIR__ . '/code.html');
+
+//a form post of the number is a login attempt
+} elseif (isset($_POST['number'])) {
+    try {
+        $groups = $db->selectCollection('users')->count([
+            'user' => $_POST['number']
+        ]);
+
+        if (!$groups) {
+            throw new Exception('Could not find that number.');
+        }
+
+        $verification = $nexmo->verify()->start([
             'number' => $_POST['number'],
             'brand'  => 'GroupChat'
         ]);
-        $_SESSION['verification'] = serialize($verificaton);
+
+        $db->selectCollection('logins')->updateOne(
+            ['_id' => $_POST['number']],
+            ['$push' => ['verifications' => $nexmo->serialize($verification)]],
+            ['upsert' => true]
+        );
+
+        //redirect, so a refresh doesn't try to start another verification
+        $_SESSION['number'] = $_POST['number'];
         header('Location: /');
         return;
-    } catch (\Nexmo\Client\Exception\Request $e) {
+    } catch (Exception $e) {
         $error = $e->getMessage();
-        $content = file_get_contents(__DIR__ . '/login.html');
     }
-} else {
+}
+
+//show default content (login form) if nothing else set
+if (!isset($content)) {
     $content = file_get_contents(__DIR__ . '/login.html');
 }
 
@@ -108,6 +155,9 @@ if (isset($_SESSION['user'])) {
 <div class="container">
     <div class="row">
         <h1>Group Chat Tutorial</h1>
+        <?php if (isset($_SESSION['user']) or isset($_SESSION['number'])): ?>
+        <p><a href="?logout=1" class="btn btn-default">Logout</a> </p>
+        <?php endif; ?>
         <p class="lead">
             This is a simple tutorial of Nexmo and the PHP Client Library<br>
             Here you can find a log of your group messages.
@@ -122,8 +172,6 @@ if (isset($_SESSION['user'])) {
 
     <?php echo $content ?>
 </div><!-- /.container -->
-
-
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>

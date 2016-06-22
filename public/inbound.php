@@ -42,7 +42,6 @@ switch (strtolower(trim($command[0]))) {
             $user = [
                 'group' => $inbound->getTo(),
                 'user' => $inbound->getFrom(),
-                'status' => 'active',
                 'actions' => []
             ];
         }
